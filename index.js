@@ -1,3 +1,5 @@
+const dotenv=require("dotenv");
+dotenv.config();
 const express=require("express");
 const app=express();
 const cors=require("cors");
@@ -5,9 +7,9 @@ app.use(cors());
 const cloudinary=require("cloudinary").v2;
 const PORT=process.env.PORT||8000;
 cloudinary.config({
-    cloud_name:"dfwyxz77d",
-    api_key:"893751572926164",
-    api_secret:"UjXkhTGjP6SHb9xvoIgXucoH5PU",
+    cloud_name:process.env.CLOUD_NAME,
+    api_key:process.env.API_KEY,
+    api_secret:process.env.API_SECRET,
 })
 app.get("/",(req,res)=>{
     res.send("The Cloudinary related backend is working fine.");

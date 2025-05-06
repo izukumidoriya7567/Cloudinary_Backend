@@ -1,18 +1,16 @@
-const dotenv=require("dotenv");
-dotenv.config();
+require("dotenv").config();
 const express=require("express");
 const app=express();
 const cors=require("cors");
 app.use(cors());
 const cloudinary=require("cloudinary").v2;
-const PORT=process.env.PORT||8000;
 cloudinary.config({
     cloud_name:process.env.CLOUD_NAME,
     api_key:process.env.API_KEY,
     api_secret:process.env.API_SECRET,
 })
 app.get("/",(req,res)=>{
-    res.send("The Cloudinary related backend is working fine.");
+    res.status(200).json({message:"The Cloudinary related backend is working fine."});
 })
 app.get("/image/:email/:folder",async(req,res)=>{
       const email=req.params.email;
@@ -32,7 +30,7 @@ app.get("/image/:email/:folder",async(req,res)=>{
             }
             images.push(obj);
         })
-        res.json(images);
+        res.status(200).json(images);
       }
       catch(e){
         res.status(500).json({message:"The Images from the folder cannot be fetched"});
@@ -44,20 +42,20 @@ app.delete("/images/:email/:folder/:public_id",async(req,res)=>{
     const publicId=req.params.public_id;
     try {
         const url=email+'/'+folder+'/'+publicId;
-        console.log(url);
         const result = await cloudinary.uploader.destroy(url);
         console.log(result);
-        if (result.result === "ok") {
-          console.log("Image deleted successfully.");
-        } else if (result.result === "not found") {
-          console.log("Image not found.");
-        } else {
-          console.log("Unexpected result:", result);
+        if(result.result === "ok") {
+          res.status(200).json({message:"Image deleted successfully"});
         }
-      } catch (error) {
+        else if(result.result === "not found") {
+          res.status(404).json("Image Not found");
+        }
+        else{
+          res.status(400).json({message:result.result});
+        }
+      } catch (e) {
+        res.status(500).json({message:`Error: ${e}`})
         console.error("Error deleting image:", error);
       }
 })
-app.listen(8000,()=>{
-    console.log("Server is up and running at PORT:8000");
-})
+module.exports=app;
